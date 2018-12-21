@@ -135,6 +135,7 @@
                     <el-radio-group v-model="form.choiceType">
                         <el-radio label="data">form-data</el-radio>
                         <el-radio label="json">raw</el-radio>
+                        <el-radio label="text">text</el-radio>
                     </el-radio-group>
                     <el-button type="primary" size="mini"
                                v-show="form.choiceType === 'json'"
@@ -146,16 +147,26 @@
                 <hr style="height:1px;border:none;border-top:1px solid rgb(241, 215, 215);"/>
 
                 <div v-if="form.choiceType === 'json'">
-                    <div style="border-style:solid;border-width: 1px;border-color: rgb(234, 234, 234) rgb(234, 234, 234) rgb(234, 234, 234) rgb(234, 234, 234)">
-                        <codemirror v-model="apiMsgData.jsonVariable"
-                                    :options="options"
-                                    height="575px">
-                        </codemirror>
+                    <div style="border:1px solid rgb(234, 234, 234) ">
+                        <el-container>
+                            <editor
+                                    style="font-size: 15px"
+                                    v-model="apiMsgData.jsonVariable"
+                                    @init="editorInit"
+                                    lang="json"
+                                    theme="chrome"
+                                    width="100%"
+                                    height="575px"
+                                    :options="{}"
+                            >
+                            </editor>
+                        </el-container>
+
                     </div>
                 </div>
                 <el-table :data="apiMsgData.variable" size="mini" stripe :show-header="false" height="582"
                           style="background-color: rgb(250, 250, 250)"
-                          v-if="form.choiceType === 'data'"
+                          v-if="form.choiceType === 'data' || form.choiceType === 'text'"
                           :row-style="{'background-color': 'rgb(250, 250, 250)'}">
                     <el-table-column label="Key" header-align="center" minWidth="100">
                         <template slot-scope="scope">
@@ -303,20 +314,12 @@
 </template>
 
 <script>
-    import 'codemirror/addon/lint/lint.css'
-    import 'codemirror/addon/lint/lint'
-    import 'codemirror/addon/lint/json-lint'
-    import 'codemirror/mode/javascript/javascript'
-    // import 'codemirror/addon/scroll/annotatescrollbar.js'
-    import 'codemirror/addon/scroll/simplescrollbars.js'
-    import 'codemirror/addon/scroll/simplescrollbars.css'
-    import {codemirror} from 'vue-codemirror-lite'
     import result from './result.vue'
     import errorView from '../common/errorView.vue'
 
     export default {
         components: {
-            codemirror,
+            editor: require('vue2-ace-editor'),
             result: result,
             errorView: errorView,
         },
@@ -379,6 +382,12 @@
             }
         },
         methods: {
+            editorInit() {
+                require('brace/ext/language_tools')
+                require('brace/mode/json')
+                require('brace/theme/chrome')
+                require('brace/snippets/json')
+            },
             querySearch(queryString, cb) {
                 // 调用 callback 返回建议列表的数据
                 cb(this.comparators);
@@ -593,6 +602,8 @@
                         });
                     }
                     else {
+                        this.apiMsgData.id = res.data['api_msg_id'];
+                        this.apiMsgData.num = res.data['num'];
                         this.$emit('apiTest', [{'apiMsgId': res.data['api_msg_id'], 'num': '1'}], false);
                     }
                 });

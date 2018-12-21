@@ -86,10 +86,20 @@
                         <div style="margin: 0 0 15px;">
                         </div>
                         <div style="border-style:solid;border-width: 1px;border-color: rgb(234, 234, 234) rgb(234, 234, 234) rgb(234, 234, 234) rgb(234, 234, 234)">
-                            <codemirror v-model="apiCaseData.json_variable"
-                                        :options="options"
-                                        height="500px">
-                            </codemirror>
+                            <el-container>
+                                <editor
+                                        style="font-size: 15px"
+                                        v-model="apiCaseData.json_variable"
+                                        @init="editorInit"
+                                        lang="json"
+                                        theme="chrome"
+                                        width="100%"
+                                        height="500px"
+                                        :options="{
+                             }"
+                                >
+                                </editor>
+                            </el-container>
                         </div>
                         <!--<el-input-->
                         <!--type="textarea"-->
@@ -263,11 +273,10 @@
 </template>
 
 <script>
-    import {codemirror} from 'vue-codemirror-lite'
 
     export default {
         components: {
-            codemirror,
+            editor: require('vue2-ace-editor'),
         },
         name: 'apiMsgDataEdit',
         props: ['apiCases'],
@@ -315,6 +324,12 @@
             }
         },
         methods: {
+            editorInit() {
+                require('brace/ext/language_tools')
+                require('brace/mode/json')
+                require('brace/theme/chrome')
+                require('brace/snippets/json')
+            },
             initData(i) {
                 this.apiCaseData.param = this.apiCases[i]['param'];
                 this.apiCaseData.variable = this.apiCases[i]['variable'];
